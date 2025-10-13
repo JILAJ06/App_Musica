@@ -1,66 +1,120 @@
-import { Component } from '@angular/core';
-import { Song } from '../interfaces/song';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
-@Component({
-  selector: 'app-player',
-  standalone: false,
-  templateUrl: './player.html',
-  styleUrl: './player.css'
+// Definimos una interfaz para tipificar nuestras canciones
+export interface Song {
+  title: string;
+  artist: string;
+  artwork: string;
+  url: string;
+}
+
+@Injectable({
+  providedIn: 'root'
 })
-export class Player {
+export class MusicPlayerService {
+  private audio = new Audio();
 
-  song = {
-    cover: "https://picsum.photos/200",
-    name: "CANCION 1",
-    artist: "ARTISTA 1"
-  }
-
-  playlist: Song[] = [
+  // --- FUENTE DE DATOS ---
+  private songs: Song[] = [
     {
-      cover: "https://picsum.photos/201",
-      name: "CANCION 1 ESTE TEXTO ES DEMASIADO LARGO",
-      artist: "ARTISTA 1"
+        title: "RENATA",
+        artist: "DAAZ, Los Esquivel, Sebastian Esquivel",
+        artwork: "https://i.scdn.co/image/ab67616d0000b273e0c352cd92376899557a5840",
+        url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
     },
     {
-      cover: "https://picsum.photos/202",
-      name: "CANCION 2",
-      artist: "ARTISTA 1"
+        title: "Na De Na",
+        artist: "Angel Dior, Crissin",
+        artwork: "https://i.scdn.co/image/ab67616d00004851212e379c6e78f2caf1856763",
+        url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
     },
     {
-      cover: "https://picsum.photos/203",
-      name: "CANCION 3",
-      artist: "ARTISTA 1"
-    },
-    {
-      cover: "https://picsum.photos/204",
-      name: "CANCION 4",
-      artist: "ARTISTA 1"
-    },
-    {
-      cover: "https://picsum.photos/205",
-      name: "CANCION 5",
-      artist: "ARTISTA 1"
-    },
-    {
-      cover: "https://picsum.photos/206",
-      name: "CANCION 6",
-      artist: "ARTISTA 1"
-    },
-    {
-      cover: "https://picsum.photos/207",
-      name: "CANCION 7",
-      artist: "ARTISTA 1"
-    },
-    {
-      cover: "https://picsum.photos/208",
-      name: "CANCION 8",
-      artist: "ARTISTA 1"
-    },
+        title: "La Carretara",
+        artist: "Prince Royce",
+        artwork: "https://i.scdn.co/image/ab67616d000048514e8685b0d0c644c35e4d6a6a",
+        url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+    }
   ];
 
-  constructor(){
-    console.log("COMPONENTE APP CREADO");
+  // --- ESTADO REACTIVO (Observables) ---
+  // Usamos BehaviorSubject para que los componentes siempre reciban el último valor al suscribirse.
+  private songList$ = new BehaviorSubject<Song[]>(this.songs);
+  private currentSong$ = new BehaviorSubject<Song | null>(null);
+  private isPlaying$ = new BehaviorSubject<boolean>(false);
+  private currentTime$ = new BehaviorSubject<number>(0);
+  private duration$ = new BehaviorSubject<number>(0);
+
+  constructor() {
+    this.loadSong(0); // Carga la primera canción al iniciar
+    this.addAudioListeners();
   }
 
+  // --- MÉTODOS PÚBLICOS PARA EXPONER EL ESTADO (como Observables) ---
+  getSongList() { return this.songList$.asObservable(); }
+  getCurrentSong() { return this.currentSong$.asObservable(); }
+  getIsPlaying() { return this.isPlaying$.asObservable(); }
+  getCurrentTime() { return this.currentTime$.asObservable(); }
+  getDuration() { return this.duration$.asObservable(); }
 
+  // --- LÓGICA DEL REPRODUCTOR ---
+
+  loadSong(index: number) {
+    const song = this.songs[index];
+    if (song) {
+      this.audio.src = song.url;
+      this.audio.load(); // Es buena práctica llamar a load()
+      this.currentSong$.next(song);
+    }
+  }
+
+  playSong(song?: Song) {
+    if (song && song !== this.currentSong$.value) {
+      const index = this.songs.findIndex(s => s.url === song.url);
+      this.loadSong(index);
+    }
+    this.audio.play();
+    this.isPlaying$.next(true);
+  }
+
+  pauseSong() {
+    this.audio.pause();
+    this.isPlaying$.next(false);
+  }
+
+  togglePlayPause() {
+    if (this.isPlaying$.value) {
+      this.pauseSong();
+    } else {
+      this.playSong(this.currentSong$.value!);
+    }
+  }
+  
+  seekTo(event: MouseEvent) {
+    const progressBar = event.target as HTMLElement;
+    const width = progressBar.clientWidth;
+    const clickX = event.offsetX;
+    const duration = this.audio.duration;
+    
+    if (duration) {
+      this.audio.currentTime = (clickX / width) * duration;
+    }
+  }
+
+  // --- LISTENERS DEL ELEMENTO AUDIO ---
+  private addAudioListeners() {
+    this.audio.addEventListener('timeupdate', () => {
+      this.currentTime$.next(this.audio.currentTime);
+    });
+
+    this.audio.addEventListener('durationchange', () => {
+      this.duration$.next(this.audio.duration);
+    });
+
+    this.audio.addEventListener('ended', () => {
+      this.isPlaying$.next(false);
+      // Opcional: pasar a la siguiente canción
+      // this.nextSong();
+    });
+  }
 }

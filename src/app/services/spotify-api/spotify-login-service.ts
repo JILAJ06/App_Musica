@@ -13,9 +13,9 @@ export class SpotifyLoginService {
 
   getToken(): Observable<any> {
     const body = new HttpParams()
-      .set("grant_type", "client_credentials")
-      .set("client_id", "9f355a2b99db4d339a0043569db157b2")
-      .set("client_secret", "4a1734110bfa4fcdbc97ab9d9fdc978e");
+      .set("grant_type", "")
+      .set("client_id", "")
+      .set("client_secret", "");
     return this._http.post<any>(
       "https://accounts.spotify.com/api/token", 
       body.toString(),
