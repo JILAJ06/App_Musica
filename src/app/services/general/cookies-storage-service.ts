@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';
 
 @Injectable({
@@ -7,7 +7,7 @@ import { CookieService } from 'ngx-cookie-service';
 export class CookiesStorageService {
   
   constructor(
-    private _cookieService: CookieService
+    @Inject(CookieService) private _cookieService: CookieService
   ){}
 
   setKey(key: string, value: string, expires: number | Date | undefined): void{

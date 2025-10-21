@@ -11,7 +11,8 @@ export const authInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
 
   return next(req).pipe(
     tap(event => {
-      if(!req.url.includes(environment.AUTH_API_URL))
+      const spotifyTokenUrl = (environment as any)?.spotifyTokenUrl;
+      if(!spotifyTokenUrl || !req.url.includes(spotifyTokenUrl))
         return;
       if(event instanceof HttpResponse && event.status === 200){
         const body = event.body as any;

@@ -7,7 +7,8 @@ export const addAuthHeaderInterceptor: HttpInterceptorFn = (req, next) => {
 
   const _cookieStorage: CookiesStorageService = inject(CookiesStorageService)
 
-  if(!req.url.includes(environment.API_URL))
+  const spotifyApiUrl = (environment as any).spotifyApiUrl;
+  if (!spotifyApiUrl || !req.url.includes(spotifyApiUrl))
     return next(req)
 
   const newReq = req.clone({

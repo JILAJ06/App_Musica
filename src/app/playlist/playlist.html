@@ -1,10 +1,22 @@
-<h1>
-    Queue
-</h1>
-<div class="content">
-    @for(song of playlist(); track song.id){
-        <app-song-info [song]="song" [cover]="cover()" displayMode="card"></app-song-info>
-    } @empty {
-        
-    }
+<h2>Playlists públicas</h2>
+<div class="playlist-list">
+    <!-- Ejemplo de visualización de playlists -->
+    <div *ngFor="let playlist of playlists" class="playlist-card" [routerLink]="['/playlist', playlist.id]">
+        <img [src]="playlist.images[0]?.url" alt="cover">
+        <div class="playlist-title">{{ playlist.name }}</div>
+        <div class="playlist-desc">{{ playlist.description }}</div>
+    </div>
+</div>
+
+<div *ngIf="selectedPlaylist">
+    <h3>Canciones de la playlist: {{ selectedPlaylist.name }}</h3>
+    <div class="song-list">
+        <div *ngFor="let item of selectedPlaylist.tracks.items" class="song-item" [routerLink]="['/song', item.track.id]">
+            <img [src]="item.track.album.images[0]?.url" alt="cover">
+            <div class="song-details">
+                <div class="song-title">{{ item.track.name }}</div>
+            <div class="song-artist">{{ getArtists(item) }}</div>
+            </div>
+        </div>
+    </div>
 </div>

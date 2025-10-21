@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
   selector: 'app-player',
   standalone: false,
   templateUrl: './player.html',
-  styleUrl: './player.css'
+  styleUrls: ['./player.css']
 })
 export class Player implements OnInit{
 

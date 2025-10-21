@@ -2,20 +2,38 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { Player } from './player/player';
 import { AudioController } from './audio-controller/audio-controller';
+import { Playlist } from './playlist/playlist';
+import { SongInfo } from './song-info/song-info';
 
 const routes: Routes = [
   {
     path: '',
-    component:Player,
-    title: 'Player Music'
+    redirectTo: 'playlists',
+    pathMatch: 'full'
   },
   {
-    path:'controller',
+    path: 'playlists',
+    component: Playlist,
+    title: 'Playlists públicas'
+  },
+  {
+    path: 'playlist/:id',
+    component: Playlist,
+    title: 'Playlist'
+  },
+  {
+    path: 'song/:id',
+    component: SongInfo,
+    title: 'Canción'
+  },
+  {
+    path: 'player',
+    component: Player,
+    title: 'Reproductor'
+  },
+  {
+    path: 'controller',
     component: AudioController
-  },
-  {
-    path:'view',
-    loadChildren: () => import('./test/test-module').then(m => m.TestModule)
   }
 ];
 
