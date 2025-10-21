@@ -1,5 +1,6 @@
-import { booleanAttribute, Component, input, OnInit } from '@angular/core';
-import { Song } from '../interfaces/song';
+import { Component, input } from '@angular/core';
+import { Track } from '../interfaces/track';
+import { Image } from '../interfaces/image';
 
 @Component({
   selector: 'app-song-info',
@@ -12,7 +13,8 @@ import { Song } from '../interfaces/song';
 })
 export class SongInfo{
   display_mode = input.required<string>({ alias: 'displayMode'});
-  song = input.required<Song>();
+  song = input.required<Track | undefined>();
+  cover = input.required<Image | undefined>();
 
   displayMode(){
     return this.display_mode();

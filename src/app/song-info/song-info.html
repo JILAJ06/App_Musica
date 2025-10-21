@@ -1,5 +1,5 @@
-<img src="{{song().cover}}" alt="" class="card-song-img">
+<img src="{{cover()?.url}}" alt="" class="card-song-img">
 <div class="card-song-details">
-    <h1 class="card-song-title">{{song().name}}</h1>
-    <h3 class="card-song-artist">{{song().artist}}</h3>
+    <h1 class="card-song-title">{{song()?.name}}</h1>
+    <h3 class="card-song-artist">{{song()?.artists?.at(0)?.name}}</h3>
 </div>

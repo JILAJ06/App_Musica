@@ -1,5 +1,7 @@
 import { Component, input } from '@angular/core';
 import { Song } from '../interfaces/song';
+import { Track } from '../interfaces/track';
+import { Image } from '../interfaces/image';
 
 @Component({
   selector: 'app-playlist',
@@ -9,6 +11,7 @@ import { Song } from '../interfaces/song';
 })
 export class Playlist {
 
-  playlist = input.required<Song[]>();
+  playlist = input.required<Track[] | undefined>();
+  cover = input.required<Image | undefined>();
 
 }

@@ -2,8 +2,8 @@
     Queue
 </h1>
 <div class="content">
-    @for(song of playlist(); track song.name){
-        <app-song-info [song]="song" displayMode="card"></app-song-info>
+    @for(song of playlist(); track song.id){
+        <app-song-info [song]="song" [cover]="cover()" displayMode="card"></app-song-info>
     } @empty {
         
     }

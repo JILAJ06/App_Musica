@@ -1,15 +1,13 @@
 export interface SpotifyTrackResponse {
-
     id: string,
     name: string,
-    artist: [
+    duration_ms: number,
+    href: string
+    artists:[
         {
             id: string,
-            href: string,
-            name: string
+            name: string,
+            href:string
         }
-    ],
-    duration_ms: number,
-    track_number: number,
-
+    ]
 }

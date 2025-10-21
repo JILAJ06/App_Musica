@@ -1,17 +1,5 @@
-/* src/styles.css */
-body {
-    background-color: #F4F7FC;
-    color: #2D3748;
-    font-family: 'Inter', sans-serif;
-    margin: 0;
-    height: 100vh;
+:host{
     display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
 }
-
-/* Importa las fuentes desde Google Fonts si no lo has hecho en index.html */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;700&family=Inter:wght@400;500&display=swap');
-
-/* Importa los íconos de Google Material Symbols */
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
