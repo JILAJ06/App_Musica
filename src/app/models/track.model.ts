@@ -16,6 +16,9 @@ export interface Album {
   id: string;
   name: string;
   images: Image[];
+  album_type?: string;
+  release_date?: string;
+  total_tracks?: number;
 }
 
 export interface Image {

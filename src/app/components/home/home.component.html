@@ -1,106 +1,239 @@
 <div class="app-container">
-  <!-- Barra de navegación fija arriba -->
-  <header class="navbar">
-    <div class="nav-content">
-      <h1 class="logo">🎵 Spotify Player</h1>
-      <nav class="nav-links">
-        <a routerLink="/" class="nav-link">Inicio</a>
-        <a routerLink="/search" class="nav-link search-btn">🔍 Buscar</a>
-      </nav>
-    </div>
-  </header>
-
-  <!-- Contenido principal -->
   <main class="main-content">
-    <!-- Canción actual (izquierda) -->
-    <section class="current-track">
-      <div class="track-card" *ngIf="currentTrack; else noTrack">
-        <div class="track-image-large">
+    <!-- Header con logo y barra de búsqueda -->
+    <header class="top-header">
+      <div class="header-logo">
+        <div class="logo-icon">🎵</div>
+        <span class="logo-text">MusicFlow</span>
+      </div>
+      
+      <div class="search-bar" [class.searching]="isLoading">
+        <span class="search-icon" *ngIf="!isLoading">🔍</span>
+        <span class="search-icon spinner-icon" *ngIf="isLoading">
+          <svg class="search-spinner" width="16" height="16" viewBox="0 0 16 16">
+            <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="30" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <input 
+          type="text" 
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearchInput()"
+          placeholder="Buscar canciones, artistas, álbumes...">
+        <button *ngIf="searchQuery" class="clear-search-btn" (click)="clearSearch()" title="Limpiar">✕</button>
+      </div>
+      
+      <div class="user-section">
+        <button class="settings-btn" title="Configuración">⚙️</button>
+        <button class="more-btn" title="Más opciones">☰</button>
+        <div class="user-avatar">JS</div>
+      </div>
+    </header>
+
+    <!-- Mensaje de error -->
+    <div class="error-banner" *ngIf="errorMessage">
+      <span class="error-icon">⚠️</span>
+      <span>{{ errorMessage }}</span>
+      <button (click)="errorMessage = ''" class="close-error">✕</button>
+    </div>
+
+    <!-- Loading indicator -->
+    <div class="loading-container" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p>Buscando...</p>
+    </div>
+
+    <!-- Resultados de búsqueda -->
+    <div class="search-results-container" *ngIf="hasSearched && !isLoading && (searchTracks.length > 0 || searchAlbums.length > 0)">
+      <!-- Sección de Canciones -->
+      <section class="search-section" *ngIf="searchTracks.length > 0">
+        <h2 class="search-section-title">Canciones</h2>
+        <div class="search-grid">
+          <div 
+            *ngFor="let track of searchTracks" 
+            class="search-card"
+            (click)="addToPlaylist(track)">
+            <div class="search-card-image">
+              <img [src]="getAlbumImage(track)" [alt]="track.name">
+              <div class="search-card-overlay">
+                <button class="add-btn" title="Agregar a playlist">+</button>
+              </div>
+            </div>
+            <div class="search-card-info">
+              <h3 class="search-card-title">{{ track.name }}</h3>
+              <p class="search-card-artist">{{ getArtistNames(track) }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sección de Álbumes -->
+      <section class="search-section" *ngIf="searchAlbums.length > 0">
+        <h2 class="search-section-title">Álbumes</h2>
+        <div class="search-grid">
+          <div 
+            *ngFor="let album of searchAlbums" 
+            class="search-card">
+            <div class="search-card-image">
+              <img [src]="getAlbumImage(album)" [alt]="album.name">
+            </div>
+            <div class="search-card-info">
+              <h3 class="search-card-title">{{ album.name }}</h3>
+              <p class="search-card-artist">{{ getArtistNames(album) }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- No results message -->
+    <div class="no-results" *ngIf="hasSearched && !isLoading && searchTracks.length === 0 && searchAlbums.length === 0">
+      <div class="no-results-icon">🎵</div>
+      <h2>No se encontraron resultados</h2>
+      <p>Intenta con otros términos de búsqueda</p>
+    </div>
+
+    <!-- Área de la playlist/canción actual -->
+    <section class="playlist-hero" *ngIf="currentTrack && !hasSearched; else noTrack">
+      <div class="playlist-hero-content">
+        <div class="playlist-image">
           <img [src]="getAlbumImage(currentTrack)" [alt]="currentTrack.name">
         </div>
-        <div class="track-info-large">
-          <h2 class="track-title">{{ currentTrack.name }}</h2>
-          <p class="track-artist">{{ getArtistNames(currentTrack) }}</p>
-          <p class="track-album">{{ currentTrack.album.name }}</p>
-        </div>
-      </div>
-      <ng-template #noTrack>
-        <div class="no-track">
-          <div class="no-track-icon">🎧</div>
-          <p>No hay canción seleccionada</p>
-          <a routerLink="/search" class="search-link">Buscar música</a>
-        </div>
-      </ng-template>
-    </section>
-
-    <!-- Playlist actual (derecha) -->
-    <aside class="playlist">
-      <h3 class="playlist-title">Playlist Actual</h3>
-      <div class="playlist-content">
-        <div *ngIf="playlist.length === 0" class="empty-playlist">
-          <p>No hay canciones en la playlist</p>
-        </div>
-        <div class="playlist-items" *ngIf="playlist.length > 0">
-          <div 
-            *ngFor="let track of playlist" 
-            class="playlist-item"
-            [class.active]="currentTrack?.id === track.id"
-            (click)="selectTrack(track)">
-            <img [src]="getAlbumImage(track)" [alt]="track.name" class="playlist-item-image">
-            <div class="playlist-item-info">
-              <p class="playlist-item-name">{{ track.name }}</p>
-              <p class="playlist-item-artist">{{ getArtistNames(track) }}</p>
-              <p class="playlist-item-album">{{ track.album.name }}</p>
-            </div>
-            <button 
-              class="remove-btn" 
-              (click)="removeFromPlaylist(track.id); $event.stopPropagation()"
-              title="Eliminar">
-              ✕
-            </button>
+        <div class="playlist-info">
+          <p class="playlist-type">{{ getAlbumType(currentTrack.album.album_type) }}</p>
+          <h1 class="playlist-title-main">{{ currentTrack.name }}</h1>
+          <div class="playlist-meta">
+            <span class="meta-artist">{{ getArtistNames(currentTrack) }}</span>
+            <span class="meta-separator">•</span>
+            <span class="meta-album">{{ currentTrack.album.name }}</span>
+            <ng-container *ngIf="getYear(currentTrack.album.release_date)">
+              <span class="meta-separator">•</span>
+              <span class="meta-year">{{ getYear(currentTrack.album.release_date) }}</span>
+            </ng-container>
+            <ng-container *ngIf="playlist.length > 0">
+              <span class="meta-separator">•</span>
+              <span class="meta-tracks">{{ playlist.length }} canciones en playlist</span>
+            </ng-container>
           </div>
         </div>
       </div>
-    </aside>
+    </section>
+    
+    <ng-template #noTrack>
+      <section class="no-track-hero" *ngIf="!hasSearched">
+        <div class="no-track-icon">🎧</div>
+        <h2>Tu biblioteca está vacía</h2>
+        <p>Busca y agrega canciones a tu playlist usando la barra de búsqueda</p>
+      </section>
+    </ng-template>
   </main>
 
-  <!-- Controles de reproducción fijos abajo -->
-  <footer class="player-controls">
-    <div class="controls-content">
-      <!-- Botones de control principales -->
-      <div class="control-buttons-group">
-        <button class="control-btn shuffle-btn" title="Aleatorio">
-          🔀
-        </button>
-        <button class="control-btn prev-btn" title="Anterior">
-          ⏮️
-        </button>
-        <button class="control-btn play-btn" title="Reproducir/Pausar">
-          ▶️
-        </button>
-        <button class="control-btn next-btn" title="Siguiente">
-          ⏭️
-        </button>
-        <button class="control-btn repeat-btn" title="Repetir">
-          🔁
-        </button>
-      </div>
+  <!-- Cola de reproducción (derecha) -->
+  <aside class="queue-panel">
+    <div class="queue-header">
+      <h3>🎵 Cola de Reproducción</h3>
+      <button class="close-queue">✕</button>
+    </div>
 
-      <!-- Información de la canción actual -->
-      <div class="track-info-mini" *ngIf="currentTrack">
-        <span class="mini-title">{{ currentTrack.name }}</span>
-        <span class="mini-artist">{{ getArtistNames(currentTrack) }}</span>
+    <div class="now-playing" *ngIf="currentTrack">
+      <p class="now-playing-label">Reproduciendo ahora</p>
+      <div class="now-playing-track">
+        <img [src]="getAlbumImage(currentTrack)" [alt]="currentTrack.name">
+        <div class="now-playing-info">
+          <p class="track-name">{{ currentTrack.name }}</p>
+          <p class="track-artist">{{ getArtistNames(currentTrack) }}</p>
+        </div>
+        <span class="track-duration">{{ currentTrack.duration_ms ? formatDuration(currentTrack.duration_ms) : '0:00' }}</span>
       </div>
+    </div>
 
-      <!-- Controles adicionales -->
-      <div class="additional-controls">
-        <button class="control-btn volume-btn" title="Volumen">
-          🔊
+    <div class="queue-content">
+      <p class="queue-label">Siguiente • {{ playlist.length }} canciones</p>
+      <div class="empty-queue" *ngIf="playlist.length === 0">
+        <p>No hay canciones en la cola</p>
+      </div>
+      <div class="queue-list" *ngIf="playlist.length > 0">
+        <div 
+          *ngFor="let track of playlist; let i = index" 
+          class="queue-item"
+          [class.active]="currentTrack?.id === track.id"
+          (click)="selectTrack(track)">
+          <span class="queue-number">{{ i + 1 }}</span>
+          <img [src]="getAlbumImage(track)" [alt]="track.name" class="queue-item-image">
+          <div class="queue-item-info">
+            <p class="queue-item-name">{{ track.name }}</p>
+            <p class="queue-item-artist">{{ getArtistNames(track) }}</p>
+          </div>
+          <span class="queue-item-duration">{{ track.duration_ms ? formatDuration(track.duration_ms) : '0:00' }}</span>
+          <button 
+            class="queue-remove-btn" 
+            (click)="removeFromPlaylist(track.id); $event.stopPropagation()"
+            title="Eliminar">
+            ✕
+          </button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Reproductor inferior -->
+  <footer class="player-bar">
+    <div class="player-left" *ngIf="currentTrack">
+      <img [src]="getAlbumImage(currentTrack)" [alt]="currentTrack.name" class="player-track-image">
+      <div class="player-track-info">
+        <p class="player-track-name">{{ currentTrack.name }}</p>
+        <p class="player-track-artist">{{ getArtistNames(currentTrack) }}</p>
+      </div>
+    </div>
+
+    <div class="player-center">
+      <div class="player-controls">
+        <button class="player-control-btn prev" title="Anterior">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M3.5 3.5A.5.5 0 0 1 4 4v8a.5.5 0 0 1-1 0V4a.5.5 0 0 1 .5-.5zm8.646 8.354a.5.5 0 0 0 .708-.708L9.207 8l3.647-3.646a.5.5 0 0 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4z"/>
+          </svg>
         </button>
-        <button class="control-btn playlist-btn" title="Ver Playlist">
-          📋
+        <button class="player-control-btn play-pause" title="Reproducir/Pausar">
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M11.596 8.697l-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
+          </svg>
+        </button>
+        <button class="player-control-btn next" title="Siguiente">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M12.5 4a.5.5 0 0 0-1 0v8a.5.5 0 0 0 1 0V4zM4.146 3.646a.5.5 0 0 0 0 .708L7.793 8l-3.647 3.646a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708 0z"/>
+          </svg>
         </button>
       </div>
+      <div class="player-progress">
+        <span class="time-current">0:03</span>
+        <div class="progress-bar">
+          <div class="progress-track"></div>
+          <div class="progress-fill" style="width: 45%">
+            <div class="progress-handle"></div>
+          </div>
+        </div>
+        <span class="time-total">3:43</span>
+      </div>
+    </div>
+
+    <div class="player-right">
+      <button class="player-control-btn volume" title="Volumen">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707z"/>
+          <path d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.483 5.483 0 0 1 11.025 8a5.483 5.483 0 0 1-1.61 3.89l.706.706z"/>
+          <path d="M8.707 11.182A4.486 4.486 0 0 0 10.025 8a4.486 4.486 0 0 0-1.318-3.182L8 5.525A3.489 3.489 0 0 1 9.025 8 3.49 3.49 0 0 1 8 10.475l.707.707zM6.717 3.55A.5.5 0 0 1 7 4v8a.5.5 0 0 1-.812.39L3.825 10.5H1.5A.5.5 0 0 1 1 10V6a.5.5 0 0 1 .5-.5h2.325l2.363-1.89a.5.5 0 0 1 .529-.06z"/>
+        </svg>
+      </button>
+      <div class="volume-slider">
+        <div class="volume-track"></div>
+        <div class="volume-fill" style="width: 75%">
+          <div class="volume-handle"></div>
+        </div>
+      </div>
+      <button class="player-control-btn fullscreen" title="Pantalla completa">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z"/>
+        </svg>
+      </button>
     </div>
   </footer>
 </div>
