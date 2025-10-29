@@ -2,20 +2,32 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject, from } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { Track, SearchResponse, SearchAllResponse, AlbumItem, ArtistItem } from '../models/track.model';
-import { environment } from '../../environments/environment';
+import { Track, AlbumItem, ArtistItem } from '../models';
+import { environment } from '../../../environments/environment';
 
+/**
+ * Servicio para interactuar con la API de Spotify
+ * Implementa autenticación Client Credentials Flow
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class SpotifyService {
-  private apiUrl = 'https://api.spotify.com/v1';
-  private authUrl = 'https://accounts.spotify.com/api/token';
+  // ===========================
+  // URLs de la API
+  // ===========================
+  private readonly apiUrl = 'https://api.spotify.com/v1';
+  private readonly authUrl = 'https://accounts.spotify.com/api/token';
   
-  // Token de acceso de Spotify
+  // ===========================
+  // Gestión de autenticación
+  // ===========================
   private accessToken = '';
   private tokenExpiration = 0;
   
+  // ===========================
+  // Observables de estado
+  // ===========================
   private currentTrackSubject = new BehaviorSubject<Track | null>(null);
   public currentTrack$ = this.currentTrackSubject.asObservable();
   
@@ -25,6 +37,10 @@ export class SpotifyService {
   constructor(private http: HttpClient) {
     this.initializeToken();
   }
+
+  // ===========================
+  // Métodos de autenticación
+  // ===========================
 
   /**
    * Inicializa el token usando Client Credentials Flow
@@ -40,16 +56,14 @@ export class SpotifyService {
 
   /**
    * Obtiene un access token usando Client Credentials Flow
+   * Si el token aún es válido, no hace una nueva petición
    */
   private async getAccessToken(): Promise<void> {
-    // Si el token aún es válido, no hacer nada
     if (this.accessToken && Date.now() < this.tokenExpiration) {
       return;
     }
 
-    const body = new HttpParams()
-      .set('grant_type', 'client_credentials');
-
+    const body = new HttpParams().set('grant_type', 'client_credentials');
     const headers = new HttpHeaders({
       'Content-Type': 'application/x-www-form-urlencoded',
       'Authorization': 'Basic ' + btoa(`${environment.spotify.clientId}:${environment.spotify.clientSecret}`)
@@ -60,7 +74,6 @@ export class SpotifyService {
         .subscribe({
           next: (response) => {
             this.accessToken = response.access_token;
-            // El token expira en 3600 segundos (1 hora), guardamos cuando expira
             this.tokenExpiration = Date.now() + (response.expires_in * 1000);
             resolve();
           },
@@ -72,29 +85,43 @@ export class SpotifyService {
     });
   }
 
+  /**
+   * Genera los headers de autorización para peticiones a la API
+   */
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Authorization': `Bearer ${this.accessToken}`
     });
   }
 
+  // ===========================
+  // Métodos de búsqueda
+  // ===========================
+
+  /**
+   * Busca pistas en Spotify por query
+   * @param query Término de búsqueda
+   * @returns Observable con array de pistas encontradas
+   */
   searchTracks(query: string): Observable<Track[]> {
     const params = new HttpParams()
       .set('q', query)
       .set('type', 'track')
       .set('limit', '20');
 
-    return this.http.get<SearchResponse>(`${this.apiUrl}/search`, {
-      headers: this.getHeaders(),
-      params: params
-    }).pipe(
+    return from(this.getAccessToken()).pipe(
+      switchMap(() => this.http.get<{ tracks: { items: Track[] } }>(`${this.apiUrl}/search`, {
+        headers: this.getHeaders(),
+        params
+      })),
       map(response => response.tracks.items)
     );
   }
 
   /**
-   * Búsqueda multi-tipo: tracks, albums y artists.
-   * Devuelve un objeto con las tres colecciones (arrays).
+   * Búsqueda completa: tracks, albums y artists
+   * @param query Término de búsqueda
+   * @returns Observable con objeto conteniendo arrays de tracks, albums y artists
    */
   searchAll(query: string): Observable<{ tracks: Track[]; albums: AlbumItem[]; artists: ArtistItem[] }> {
     const params = new HttpParams()
@@ -102,9 +129,8 @@ export class SpotifyService {
       .set('type', 'track,album,artist')
       .set('limit', '20');
 
-    // Asegurarse de tener token válido antes de la petición
     return from(this.getAccessToken()).pipe(
-      switchMap(() => this.http.get<SearchAllResponse>(`${this.apiUrl}/search`, {
+      switchMap(() => this.http.get<any>(`${this.apiUrl}/search`, {
         headers: this.getHeaders(),
         params
       })),
@@ -116,17 +142,36 @@ export class SpotifyService {
     );
   }
 
+  /**
+   * Obtiene información de una pista específica por ID
+   * @param id ID de la pista en Spotify
+   * @returns Observable con la información de la pista
+   */
   getTrack(id: string): Observable<Track> {
-    return this.http.get<Track>(`${this.apiUrl}/tracks/${id}`, {
-      headers: this.getHeaders()
-    });
+    return from(this.getAccessToken()).pipe(
+      switchMap(() => this.http.get<Track>(`${this.apiUrl}/tracks/${id}`, {
+        headers: this.getHeaders()
+      }))
+    );
   }
 
+  // ===========================
+  // Gestión de playlist local
+  // ===========================
+
+  /**
+   * Establece la pista actual y la agrega a la playlist
+   * @param track Pista a establecer como actual
+   */
   setCurrentTrack(track: Track): void {
     this.currentTrackSubject.next(track);
     this.addToPlaylist(track);
   }
 
+  /**
+   * Agrega una pista a la playlist (evita duplicados)
+   * @param track Pista a agregar
+   */
   addToPlaylist(track: Track): void {
     const currentPlaylist = this.playlistSubject.value;
     const exists = currentPlaylist.find(t => t.id === track.id);
@@ -136,28 +181,46 @@ export class SpotifyService {
     }
   }
 
+  /**
+   * Elimina una pista de la playlist por ID
+   * @param trackId ID de la pista a eliminar
+   */
   removeFromPlaylist(trackId: string): void {
     const currentPlaylist = this.playlistSubject.value;
     this.playlistSubject.next(currentPlaylist.filter(t => t.id !== trackId));
   }
 
+  /**
+   * Obtiene la pista actualmente reproduciendo (valor actual del BehaviorSubject)
+   * @returns La pista actual o null si no hay ninguna
+   */
   getCurrentTrack(): Track | null {
     return this.currentTrackSubject.value;
   }
 
+  /**
+   * Obtiene la playlist completa (valor actual del BehaviorSubject)
+   * @returns Array con todas las pistas en la playlist
+   */
   getPlaylist(): Track[] {
     return this.playlistSubject.value;
   }
 
+  // ===========================
+  // Métodos de utilidad
+  // ===========================
+
   /**
    * Verifica si el servicio está listo para hacer peticiones
+   * @returns true si hay un token válido, false en caso contrario
    */
   isReady(): boolean {
     return this.accessToken !== '' && Date.now() < this.tokenExpiration;
   }
 
   /**
-   * Obtiene información del token (útil para debugging)
+   * Obtiene información del estado del token (útil para debugging)
+   * @returns Objeto con información del token
    */
   getTokenInfo(): { hasToken: boolean; expiresIn: number } {
     return {
