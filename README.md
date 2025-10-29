@@ -1,148 +1,195 @@
-# 🎵 App Reproductor de Música - Spotify
+# 🎵 MusicFlow - Spotify Player
 
-Aplicación de reproductor de música desarrollada en Angular que utiliza la API de Spotify. Diseñada con una paleta de colores en tonalidades azules.
+Aplicación moderna de reproductor de música desarrollada en **Angular 18** que utiliza la API de Spotify. Diseño inspirado en Spotify con búsqueda en tiempo real y gestión de playlist.
 
-## 🎨 Características
+## ✨ Características
 
-- **Búsqueda de canciones**: Interfaz de búsqueda con la API de Spotify
-- **Visualización de canciones**: Muestra información de las canciones (nombre, artista, álbum)
-- **Playlist dinámica**: Gestión de lista de reproducción en tiempo real
-- **Diseño responsivo**: Interfaz moderna con gradientes azules
-- **Navegación fija**: Barra de búsqueda arriba y controles abajo siempre visibles
+- 🔍 **Búsqueda en tiempo real** - Resultados mientras escribes (debounce de 500ms)
+- 🎵 **Integración completa con Spotify API** - Canciones, álbumes y artistas
+- 📋 **Gestión de playlist dinámica** - Agrega y elimina canciones
+- 🎨 **Diseño moderno** - Interfaz inspirada en Spotify con degradados
+- 📱 **Totalmente responsivo** - Funciona en desktop, tablet y móvil
+- ⚡ **Rendimiento optimizado** - Lazy loading y standalone components
 
-## 🛠️ Tecnologías utilizadas
+## 🛠️ Stack Tecnológico
 
-- **Angular 18** (Standalone Components)
-- **TypeScript**
-- **RxJS** para programación reactiva
-- **HttpClient** con HttpParams para consumo de API
-- **Angular Router** con RouterLink y Route Params
-- **Spotify Web API**
+- **Angular 18** - Framework con standalone components
+- **TypeScript 5** - Tipado estático y JSDoc completo
+- **RxJS 7** - Programación reactiva (Subject, debounceTime, distinctUntilChanged)
+- **Spotify Web API** - Autenticación Client Credentials Flow
+- **CSS3** - Grid Layout, gradientes y glassmorphism
 
-## 📋 Requisitos previos
+## 📋 Requisitos Previos
 
-- Node.js (versión 18 o superior)
-- npm o yarn
+- **Node.js** 18 o superior
+- **npm** o **yarn**
 - Cuenta de desarrollador de Spotify
 
-## 🔑 Configuración de Spotify API
+## � Instalación y Configuración
 
-1. Ve a [Spotify for Developers](https://developer.spotify.com/)
-2. Inicia sesión con tu cuenta de Spotify
-3. Ve a "Dashboard" y crea una nueva aplicación
-4. Obtén tu **Client ID** y **Client Secret**
-5. Para obtener un token de acceso:
-   - Usa la herramienta [Spotify Web API Console](https://developer.spotify.com/console/)
-   - O implementa el flujo de OAuth 2.0
+### 1️⃣ Clonar e instalar dependencias
 
-6. Abre el archivo `src/app/services/spotify.service.ts`
-7. Reemplaza `'TU_TOKEN_AQUI'` con tu token de acceso:
-
-```typescript
-private accessToken = 'TU_TOKEN_DE_SPOTIFY';
-```
-
-**Nota**: El token expira después de 1 hora. Para producción, implementa el flujo completo de OAuth 2.0.
-
-## 🚀 Instalación
-
-1. Clona o descarga este repositorio
-
-2. Instala las dependencias:
 ```bash
+git clone <tu-repositorio>
+cd App_Musica
 npm install
 ```
 
-3. Configura tu token de Spotify en `src/app/services/spotify.service.ts`
+### 2️⃣ Configurar Spotify API
 
-4. Inicia el servidor de desarrollo:
+1. Ve a [Spotify for Developers](https://developer.spotify.com/dashboard)
+2. Crea una nueva aplicación
+3. Obtén tu **Client ID** y **Client Secret**
+4. Crea un archivo `.env` en la raíz del proyecto:
+
+```env
+SPOTIFY_CLIENT_ID=tu_client_id_aqui
+SPOTIFY_CLIENT_SECRET=tu_client_secret_aqui
+```
+
+5. Actualiza `src/environments/environment.ts`:
+
+```typescript
+export const environment = {
+  production: false,
+  spotify: {
+    clientId: 'TU_CLIENT_ID',
+    clientSecret: 'TU_CLIENT_SECRET'
+  }
+};
+```
+
+### 3️⃣ Ejecutar la aplicación
+
 ```bash
 npm start
 ```
 
-5. Abre tu navegador en `http://localhost:4200`
+Abre tu navegador en `http://localhost:4200`
 
-## 📁 Estructura del proyecto
+## 📁 Estructura del Proyecto
 
 ```
-src/
-├── app/
-│   ├── components/
-│   │   ├── home/              # Página principal con playlist
-│   │   ├── search/            # Búsqueda de canciones
-│   │   └── track-detail/      # Detalle de canción (Route Params)
-│   ├── models/
-│   │   └── track.model.ts     # Interfaces de TypeScript
-│   ├── services/
-│   │   └── spotify.service.ts # Servicio con HttpParams
-│   ├── app.component.ts
-│   ├── app.config.ts
-│   └── app.routes.ts          # Configuración de rutas
-├── styles.css
-└── index.html
+src/app/
+├── core/                      # Módulo Core - Funcionalidad base
+│   ├── models/               # Interfaces TypeScript (Track, Album, Artist)
+│   │   ├── track.model.ts
+│   │   ├── artist.model.ts
+│   │   ├── album.model.ts
+│   │   ├── image.model.ts
+│   │   ├── search.model.ts
+│   │   └── index.ts          # Barrel export
+│   ├── services/             # Servicios compartidos
+│   │   ├── spotify.service.ts
+│   │   └── index.ts
+│   ├── constants/            # Constantes de la aplicación
+│   │   ├── app.constants.ts
+│   │   └── index.ts
+│   └── index.ts              # Barrel export principal
+│
+├── components/               # Componentes de UI
+│   └── home/                # Componente principal
+│       ├── home.component.ts
+│       ├── home.component.html
+│       └── home.component.css
+│
+├── app.component.ts         # Componente raíz
+├── app.config.ts            # Configuración de la app
+└── app.routes.ts            # Definición de rutas
 ```
 
-## 🎯 Funcionalidades implementadas
+### �️ Arquitectura
 
-### HTTP Params
-- Uso de `HttpParams` en las peticiones a la API de Spotify
-- Parámetros de búsqueda configurables (query, type, limit)
+**Principios aplicados:**
+- ✅ **Separación de responsabilidades** - Core, Components, Services
+- ✅ **Barrel Exports** - Imports limpios con `index.ts`
+- ✅ **JSDoc completo** - Documentación en todos los métodos
+- ✅ **Constantes centralizadas** - Sin valores hardcodeados
+- ✅ **Type Safety** - TypeScript strict mode
 
-### Route Params
-- Ruta `/track/:id` que usa parámetros dinámicos
-- Acceso a parámetros mediante `ActivatedRoute`
+## 🎯 Funcionalidades Implementadas
 
-### Angular Routing
-- Configuración de rutas con lazy loading
-- Navegación programática con `Router`
-- Redirección de rutas no encontradas
+### 🔍 Búsqueda en Tiempo Real
+```typescript
+// Debounce de 500ms para evitar llamadas excesivas
+searchSubject.pipe(
+  debounceTime(SEARCH_DEBOUNCE_TIME),
+  distinctUntilChanged()
+)
+```
 
-### Router Link
-- Enlaces de navegación declarativos
-- Navegación entre componentes sin recargar la página
+### 🎵 Gestión de Playlist
+- Agregar canciones (sin duplicados)
+- Eliminar canciones
+- Visualizar canción actual
+- Cola de reproducción
 
-## 🎨 Diseño
+### 🔐 Autenticación Spotify
+- Client Credentials Flow
+- Renovación automática de token
+- Manejo de errores (401, 429)
 
-La aplicación utiliza una paleta de colores en tonalidades azules:
-- **Primarios**: #0a1929, #1a2980, #1e3a8a
-- **Acentos**: #3b82f6, #60a5fa
-- **Texto**: #e0e7ff, #93c5fd, #bfdbfe
+### 📱 Diseño Responsivo
+- **Desktop**: 2 columnas (contenido principal + cola)
+- **Tablet**: 1 columna con cola oculta
+- **Mobile**: Layout vertical optimizado
+
+## 🎨 Diseño y Paleta de Colores
+
+### Colores Principales
+```css
+--bg-dark: #0a0e27
+--bg-card: #1a1f3a
+--accent-blue: #3b82f6
+--accent-purple: #8b5cf6
+--text-primary: #ffffff
+--text-secondary: #94a3b8
+```
 
 ### Layout
+- **Header**: Logo + Barra de búsqueda (fijo superior)
+- **Main**: Contenido principal con resultados de búsqueda
+- **Queue**: Cola de reproducción (derecha)
+- **Player Bar**: Controles de reproducción (fijo inferior)
 
-- **Barra superior fija**: Navegación y búsqueda
-- **Contenido central**:
-  - Izquierda: Canción actual en grande
-  - Derecha: Playlist actual
-- **Barra inferior fija**: Controles de reproducción
-
-## 📝 Notas importantes
-
-- Esta aplicación **NO reproduce audio**, solo muestra información de las canciones
-- Los datos mostrados son: nombre de canción, artista y álbum
-- La API de Spotify tiene límites de uso, revisa la documentación oficial
-- El token de acceso debe renovarse periódicamente
-
-## 🔧 Scripts disponibles
+## 🔧 Scripts Disponibles
 
 ```bash
-npm start          # Inicia servidor de desarrollo
-npm run build      # Construye la aplicación para producción
-npm run watch      # Construye en modo desarrollo con watch
-npm test           # Ejecuta las pruebas
+npm start          # Servidor de desarrollo (puerto 4200)
+npm run build      # Build de producción
+npm run watch      # Build en modo watch
+npm test           # Ejecutar tests
+npm run lint       # Linter de código
 ```
 
-## 📚 Recursos
+## 📚 Recursos y Documentación
 
-- [Documentación de Angular](https://angular.io/docs)
+- [Angular Documentation](https://angular.io/docs)
 - [Spotify Web API](https://developer.spotify.com/documentation/web-api)
-- [Angular Router](https://angular.io/guide/router)
-- [HttpClient Angular](https://angular.io/guide/http)
+- [RxJS Operators](https://rxjs.dev/guide/operators)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
 
-## 🤝 Contribuciones
+## 🤝 Contribuir
 
-Las contribuciones son bienvenidas. Por favor, abre un issue o pull request.
+Las contribuciones son bienvenidas! Por favor:
+
+1. Fork el proyecto
+2. Crea una rama (`git checkout -b feature/nueva-funcionalidad`)
+3. Commit tus cambios (`git commit -m 'Agrega nueva funcionalidad'`)
+4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
+5. Abre un Pull Request
+
+## � Notas Importantes
+
+- ⚠️ **Sin reproducción de audio**: Esta app solo muestra información, no reproduce música
+- 🔄 **Token expira en 1 hora**: Se renueva automáticamente
+- 📊 **Rate Limits**: Spotify API tiene límites de peticiones
+- 🔒 **Seguridad**: No expongas tus credenciales en repositorios públicos
 
 ## 📄 Licencia
 
-Este proyecto es de código abierto y está disponible bajo la licencia MIT.
+Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
+
+---
+
+Desarrollado con ❤️ usando Angular 18 y Spotify API
