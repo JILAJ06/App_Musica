@@ -1,0 +1,44 @@
+<div class="detail-container">
+  <!-- Header fijo -->
+  <header class="detail-header">
+    <div class="header-content">
+      <a routerLink="/" class="back-btn">← Volver</a>
+      <h1>Detalles de la Canción</h1>
+    </div>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="detail-content">
+    <div *ngIf="isLoading" class="loading">
+      <div class="spinner"></div>
+      <p>Cargando...</p>
+    </div>
+
+    <div *ngIf="!isLoading && track" class="track-detail-card">
+      <div class="track-image-container">
+        <img [src]="getAlbumImage()" [alt]="track.name" class="track-image">
+      </div>
+      <div class="track-info">
+        <h2 class="track-title">{{ track.name }}</h2>
+        <p class="track-artist">Artista: {{ getArtistNames() }}</p>
+        <p class="track-album">Álbum: {{ track.album.name }}</p>
+        <button (click)="playTrack()" class="play-button">
+          ▶️ Reproducir
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="!isLoading && !track" class="error">
+      <p>No se pudo cargar la canción</p>
+    </div>
+  </main>
+
+  <!-- Controles fijos -->
+  <footer class="player-controls">
+    <div class="controls-content">
+      <button class="control-btn">⏮️</button>
+      <button class="control-btn play-btn">▶️</button>
+      <button class="control-btn">⏭️</button>
+    </div>
+  </footer>
+</div>

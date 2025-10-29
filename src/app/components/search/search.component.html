@@ -1,0 +1,115 @@
+<div class="search-container">
+  <!-- Barra de búsqueda fija -->
+  <header class="search-header">
+    <div class="search-bar">
+      <input 
+        type="text" 
+        [(ngModel)]="searchQuery"
+        (keyup.enter)="onSearch()"
+        placeholder="Buscar canciones, artistas..."
+        class="search-input">
+      <button (click)="onSearch()" class="search-button">
+         Buscar
+      </button>
+      <button routerLink="/" class="back-button">← Volver</button>
+    </div>
+    
+    <!-- Indicador de estado de API -->
+    <div class="api-status" *ngIf="apiConnected">
+      <span class="status-dot"></span>
+      <span>API Conectada</span>
+    </div>
+    
+    <!-- Mensaje de error -->
+    <div class="error-message" *ngIf="errorMessage">
+      ⚠️ {{ errorMessage }}
+    </div>
+  </header>
+
+  <!-- Resultados de búsqueda -->
+  <main class="search-results">
+    <div *ngIf="isLoading" class="loading">
+      <div class="spinner"></div>
+      <p>Buscando...</p>
+    </div>
+
+  <div *ngIf="!isLoading && hasSearched && (searchTracks.length + searchAlbums.length + searchArtists.length === 0)" class="no-results">
+      <div class="no-results-icon">🎵</div>
+      <p>No se encontraron resultados para "{{ searchQuery }}"</p>
+    </div>
+
+    <div *ngIf="!isLoading && (searchTracks.length || searchAlbums.length || searchArtists.length)" class="results-wrapper">
+
+      <!-- Tracks section -->
+      <section *ngIf="searchTracks.length" class="section">
+        <h3 class="section-title">Canciones</h3>
+        <div class="results-grid">
+          <div 
+            *ngFor="let track of searchTracks" 
+            class="track-card"
+            (click)="selectTrack(track)">
+            <div class="track-image">
+              <img [src]="getAlbumImage(track)" [alt]="track.name">
+              <div class="play-overlay">
+                <span class="play-icon">▶️</span>
+              </div>
+            </div>
+            <div class="track-info">
+              <h3 class="track-name">{{ track.name }}</h3>
+              <p class="track-artist">{{ getArtistNames(track) }}</p>
+              <p class="track-album">{{ track.album.name }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Albums section -->
+      <section *ngIf="searchAlbums.length" class="section">
+        <h3 class="section-title">Álbumes</h3>
+        <div class="results-grid">
+          <div *ngFor="let album of searchAlbums" class="track-card album-card">
+            <div class="track-image">
+              <img [src]="getAlbumImage(album)" [alt]="album.name">
+            </div>
+            <div class="track-info">
+              <h3 class="track-name">{{ album.name }}</h3>
+              <p class="track-artist">{{ getArtistNames(album) }}</p>
+              <p class="track-album">{{ album.release_date || '' }} • {{ album.total_tracks || '' }} canciones</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Artists section -->
+      <section *ngIf="searchArtists.length" class="section">
+        <h3 class="section-title">Artistas</h3>
+        <div class="results-grid">
+          <div *ngFor="let artist of searchArtists" class="track-card artist-card">
+            <div class="track-image">
+              <img [src]="getAlbumImage(artist)" [alt]="artist.name">
+            </div>
+            <div class="track-info">
+              <h3 class="track-name">{{ artist.name }}</h3>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <div *ngIf="!hasSearched" class="search-prompt">
+      <div class="search-prompt-icon">🎧</div>
+      <h2>Busca tu música favorita</h2>
+      <p>Escribe el nombre de una canción, artista o álbum</p>
+    </div>
+  </main>
+
+  <!-- Controles fijos abajo -->
+  <footer class="player-controls">
+    <div class="controls-content">
+      <button class="control-btn">⏮️</button>
+      <button class="control-btn play-btn">▶️</button>
+      <button class="control-btn">⏭️</button>
+    </div>
+  </footer>
+</div>

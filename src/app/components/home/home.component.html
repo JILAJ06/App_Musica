@@ -1,0 +1,106 @@
+<div class="app-container">
+  <!-- Barra de navegación fija arriba -->
+  <header class="navbar">
+    <div class="nav-content">
+      <h1 class="logo">🎵 Spotify Player</h1>
+      <nav class="nav-links">
+        <a routerLink="/" class="nav-link">Inicio</a>
+        <a routerLink="/search" class="nav-link search-btn">🔍 Buscar</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="main-content">
+    <!-- Canción actual (izquierda) -->
+    <section class="current-track">
+      <div class="track-card" *ngIf="currentTrack; else noTrack">
+        <div class="track-image-large">
+          <img [src]="getAlbumImage(currentTrack)" [alt]="currentTrack.name">
+        </div>
+        <div class="track-info-large">
+          <h2 class="track-title">{{ currentTrack.name }}</h2>
+          <p class="track-artist">{{ getArtistNames(currentTrack) }}</p>
+          <p class="track-album">{{ currentTrack.album.name }}</p>
+        </div>
+      </div>
+      <ng-template #noTrack>
+        <div class="no-track">
+          <div class="no-track-icon">🎧</div>
+          <p>No hay canción seleccionada</p>
+          <a routerLink="/search" class="search-link">Buscar música</a>
+        </div>
+      </ng-template>
+    </section>
+
+    <!-- Playlist actual (derecha) -->
+    <aside class="playlist">
+      <h3 class="playlist-title">Playlist Actual</h3>
+      <div class="playlist-content">
+        <div *ngIf="playlist.length === 0" class="empty-playlist">
+          <p>No hay canciones en la playlist</p>
+        </div>
+        <div class="playlist-items" *ngIf="playlist.length > 0">
+          <div 
+            *ngFor="let track of playlist" 
+            class="playlist-item"
+            [class.active]="currentTrack?.id === track.id"
+            (click)="selectTrack(track)">
+            <img [src]="getAlbumImage(track)" [alt]="track.name" class="playlist-item-image">
+            <div class="playlist-item-info">
+              <p class="playlist-item-name">{{ track.name }}</p>
+              <p class="playlist-item-artist">{{ getArtistNames(track) }}</p>
+              <p class="playlist-item-album">{{ track.album.name }}</p>
+            </div>
+            <button 
+              class="remove-btn" 
+              (click)="removeFromPlaylist(track.id); $event.stopPropagation()"
+              title="Eliminar">
+              ✕
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Controles de reproducción fijos abajo -->
+  <footer class="player-controls">
+    <div class="controls-content">
+      <!-- Botones de control principales -->
+      <div class="control-buttons-group">
+        <button class="control-btn shuffle-btn" title="Aleatorio">
+          🔀
+        </button>
+        <button class="control-btn prev-btn" title="Anterior">
+          ⏮️
+        </button>
+        <button class="control-btn play-btn" title="Reproducir/Pausar">
+          ▶️
+        </button>
+        <button class="control-btn next-btn" title="Siguiente">
+          ⏭️
+        </button>
+        <button class="control-btn repeat-btn" title="Repetir">
+          🔁
+        </button>
+      </div>
+
+      <!-- Información de la canción actual -->
+      <div class="track-info-mini" *ngIf="currentTrack">
+        <span class="mini-title">{{ currentTrack.name }}</span>
+        <span class="mini-artist">{{ getArtistNames(currentTrack) }}</span>
+      </div>
+
+      <!-- Controles adicionales -->
+      <div class="additional-controls">
+        <button class="control-btn volume-btn" title="Volumen">
+          🔊
+        </button>
+        <button class="control-btn playlist-btn" title="Ver Playlist">
+          📋
+        </button>
+      </div>
+    </div>
+  </footer>
+</div>
