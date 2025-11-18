@@ -37,4 +37,4 @@ jobs:
                 aws-region: us-east-1
 
             - name: Deploy to S3
-              run: aws s3 sync dist/EXAMPLE_APP/browser s3://amzn-static-angular --delete --exclude ".*"
+              run: aws s3 sync dist/app-reproductor/browser s3://amzn-frontend-dist-musapp0001 --delete --exclude ".*"
