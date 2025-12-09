@@ -5,29 +5,17 @@ import { map, switchMap } from 'rxjs/operators';
 import { Track, AlbumItem, ArtistItem, AlbumDetail, ArtistDetail } from '../models';
 import { environment } from '../../../environments/environment';
 
-/**
- * Servicio para interactuar con la API de Spotify
- * Implementa autenticación Client Credentials Flow
- */
 @Injectable({
   providedIn: 'root'
 })
 export class SpotifyService {
-  // ===========================
-  // URLs de la API
-  // ===========================
+
   private readonly apiUrl = 'https://api.spotify.com/v1';
   private readonly authUrl = 'https://accounts.spotify.com/api/token';
   
-  // ===========================
-  // Gestión de autenticación
-  // ===========================
   private accessToken = '';
   private tokenExpiration = 0;
   
-  // ===========================
-  // Observables de estado
-  // ===========================
   private currentTrackSubject = new BehaviorSubject<Track | null>(null);
   public currentTrack$ = this.currentTrackSubject.asObservable();
   
@@ -38,13 +26,6 @@ export class SpotifyService {
     this.initializeToken();
   }
 
-  // ===========================
-  // Métodos de autenticación
-  // ===========================
-
-  /**
-   * Inicializa el token usando Client Credentials Flow
-   */
   private async initializeToken(): Promise<void> {
     try {
       await this.getAccessToken();
@@ -54,10 +35,6 @@ export class SpotifyService {
     }
   }
 
-  /**
-   * Obtiene un access token usando Client Credentials Flow
-   * Si el token aún es válido, no hace una nueva petición
-   */
   private async getAccessToken(): Promise<void> {
     if (this.accessToken && Date.now() < this.tokenExpiration) {
       return;
@@ -85,18 +62,11 @@ export class SpotifyService {
     });
   }
 
-  /**
-   * Genera los headers de autorización para peticiones a la API
-   */
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Authorization': `Bearer ${this.accessToken}`
     });
   }
-
-  // ===========================
-  // Métodos de búsqueda
-  // ===========================
 
   /**
    * Busca pistas en Spotify por query
@@ -219,9 +189,8 @@ export class SpotifyService {
     );
   }
 
-  // ===========================
   // Gestión de playlist local
-  // ===========================
+  
 
   /**
    * Establece la pista actual y la agrega a la playlist
@@ -270,9 +239,9 @@ export class SpotifyService {
     return this.playlistSubject.value;
   }
 
-  // ===========================
+
   // Métodos de utilidad
-  // ===========================
+  
 
   /**
    * Verifica si el servicio está listo para hacer peticiones

@@ -1,4 +1,4 @@
-
+// Tiempo de debounce para búsquedas (en ms)
 export const SEARCH_DEBOUNCE_TIME = 500;
 
 export const PLACEHOLDER_IMAGE_URL = 'https://via.placeholder.com/300';

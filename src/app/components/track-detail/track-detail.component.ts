@@ -6,6 +6,9 @@ import { Track } from '../../core/models';
 import { PLACEHOLDER_IMAGE_URL } from '../../core/constants';
 
 
+/** * Componente de detalle de canción
+ * Muestra información completa de la canción y permite reproducirla
+ */ 
 @Component({
   selector: 'app-track-detail',
   standalone: true,
@@ -13,6 +16,7 @@ import { PLACEHOLDER_IMAGE_URL } from '../../core/constants';
   templateUrl: './track-detail.component.html',
   styleUrls: ['./track-detail.component.css']
 })
+
 export class TrackDetailComponent implements OnInit {
   track: Track | null = null;
   isLoading: boolean = true;

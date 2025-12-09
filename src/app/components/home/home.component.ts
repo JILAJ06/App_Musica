@@ -77,10 +77,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.apiConnected = this.spotifyService.isReady();
   }
 
-  /**
-   * Maneja el evento de input en la barra de búsqueda
-   * Emite el valor al subject para debounce automático
-   */
   onSearchInput(): void {
     this.searchSubject.next(this.searchQuery);
   }
@@ -126,18 +122,12 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Búsqueda manual con Enter (mantiene compatibilidad)
-   */
   onSearch(): void {
     if (this.searchQuery && this.searchQuery.trim().length > 0) {
       this.performSearch(this.searchQuery.trim());
     }
   }
 
-  /**
-   * Limpia solo los resultados de búsqueda (mantiene query)
-   */
   clearSearchResults(): void {
     this.hasSearched = false;
     this.searchTracks = [];
@@ -146,17 +136,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
   }
 
-  /**
-   * Limpia completamente la búsqueda (incluye query)
-   */
   clearSearch(): void {
     this.searchQuery = '';
     this.clearSearchResults();
   }
-
-  // ===========================
-  // Gestión de playlist
-  // ===========================
 
   /**
    * Agrega una pista a la playlist
@@ -183,9 +166,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.clearSearch();
   }
 
-  // ===========================
   // Métodos de utilidad
-  // ===========================
+  
 
   /**
    * Navega al detalle de un álbum
