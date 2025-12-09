@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
@@ -8,10 +9,6 @@ import { SpotifyService } from '../../core/services';
 import { Track, AlbumItem, ArtistItem } from '../../core/models';
 import { SEARCH_DEBOUNCE_TIME, PLACEHOLDER_IMAGE_URL, ERROR_MESSAGES } from '../../core/constants';
 
-/**
- * Componente principal de la aplicación
- * Gestiona la búsqueda de música, playlist y reproductor
- */
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -21,15 +18,11 @@ import { SEARCH_DEBOUNCE_TIME, PLACEHOLDER_IMAGE_URL, ERROR_MESSAGES } from '../
 })
 export class HomeComponent implements OnInit, OnDestroy {
   
-  // ===========================
-  // Estado del reproductor
-  // ===========================
   currentTrack: Track | null = null;
   playlist: Track[] = [];
 
-  // ===========================
-  // Estado de búsqueda
-  // ===========================
+  isQueueVisible: boolean = true;
+
   searchQuery: string = '';
   isLoading: boolean = false;
   hasSearched: boolean = false;
@@ -40,16 +33,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   searchAlbums: AlbumItem[] = [];
   searchArtists: ArtistItem[] = [];
 
-  // ===========================
-  // RxJS Subjects
-  // ===========================
   private searchSubject = new Subject<string>();
 
-  constructor(private spotifyService: SpotifyService) {}
-
-  // ===========================
-  // Lifecycle hooks
-  // ===========================
+  constructor(
+    private spotifyService: SpotifyService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.initializeSubscriptions();
@@ -61,13 +50,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.searchSubject.complete();
   }
 
-  // ===========================
-  // Inicialización
-  // ===========================
-
-  /**
-   * Inicializa las suscripciones a observables del servicio
-   */
   private initializeSubscriptions(): void {
     this.spotifyService.currentTrack$.subscribe(track => {
       this.currentTrack = track;
@@ -78,10 +60,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Configura el debounce para búsqueda automática
-   * Espera SEARCH_DEBOUNCE_TIME ms después de que el usuario deje de escribir
-   */
   private setupSearchDebounce(): void {
     this.searchSubject.pipe(
       debounceTime(SEARCH_DEBOUNCE_TIME),
@@ -95,20 +73,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Verifica si la API de Spotify está lista
-   */
   private checkApiConnection(): void {
     this.apiConnected = this.spotifyService.isReady();
   }
-
-  // ===========================
-  // Métodos de búsqueda
-  // ===========================
-
-  // ===========================
-  // Métodos de búsqueda
-  // ===========================
 
   /**
    * Maneja el evento de input en la barra de búsqueda
@@ -221,6 +188,30 @@ export class HomeComponent implements OnInit, OnDestroy {
   // ===========================
 
   /**
+   * Navega al detalle de un álbum
+   * @param albumId ID del álbum
+   */
+  navigateToAlbum(albumId: string): void {
+    this.router.navigate(['/album', albumId]);
+  }
+
+  /**
+   * Navega al detalle de una canción
+   * @param trackId ID de la canción
+   */
+  navigateToTrack(trackId: string): void {
+    this.router.navigate(['/track', trackId]);
+  }
+
+  /**
+   * Navega al perfil de un artista
+   * @param artistId ID del artista
+   */
+  navigateToArtist(artistId: string): void {
+    this.router.navigate(['/artist', artistId]);
+  }
+
+  /**
    * Obtiene nombres de artistas formateados
    * @param item Track, Album o Artist
    * @returns String con nombres de artistas separados por coma
@@ -262,6 +253,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   getYear(dateString?: string): string {
     if (!dateString) return '';
     return dateString.split('-')[0];
+  }
+
+  /**
+   * Alterna la visibilidad de la cola de reproducción
+   */
+  toggleQueue(): void {
+    this.isQueueVisible = !this.isQueueVisible;
   }
 
   /**

@@ -11,16 +11,10 @@ export interface SearchResponse {
   };
 }
 
-/**
- * Respuesta completa de búsqueda (pistas, álbumes y artistas)
- */
 export interface SearchAllResponse {
-  /** Resultados de búsqueda de pistas */
   tracks?: { items: Track[] };
   
-  /** Resultados de búsqueda de álbumes */
   albums?: { items: AlbumItem[] };
   
-  /** Resultados de búsqueda de artistas */
   artists?: { items: ArtistItem[] };
 }

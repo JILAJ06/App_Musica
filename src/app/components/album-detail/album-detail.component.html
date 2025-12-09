@@ -1,0 +1,96 @@
+<div class="album-detail-container" *ngIf="!isLoading && album">
+
+  <div class="album-header">
+    <button class="back-button" (click)="goBack()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+
+    <div class="album-info-wrapper">
+      <div class="album-cover">
+        <img [src]="getAlbumImage()" [alt]="album.name">
+      </div>
+
+      <div class="album-info">
+        <span class="album-type">{{ album.album_type?.toUpperCase() || 'ÁLBUM' }}</span>
+        <h1 class="album-title">{{ album.name }}</h1>
+        
+        <div class="album-artists">
+          <span *ngFor="let artist of album.artists; let last = last">
+            <a class="artist-link" (click)="goToArtist(artist.id)">{{ artist.name }}</a>
+            <span *ngIf="!last">, </span>
+          </span>
+        </div>
+
+        <div class="album-metadata">
+          <span>{{ getYear() }}</span>
+          <span class="separator">•</span>
+          <span>{{ album.total_tracks }} canciones</span>
+          <span class="separator">•</span>
+          <span>{{ getTotalDuration() }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tracklist">
+    <div class="tracklist-header">
+      <div class="track-number">#</div>
+      <div class="track-title">Título</div>
+      <div class="track-duration">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8z"/>
+          <path d="M8 3.5a.5.5 0 01.5.5v4a.5.5 0 01-.5.5H5.5a.5.5 0 010-1H7.5V4a.5.5 0 01.5-.5z"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="track-item" 
+         *ngFor="let track of album.tracks.items; let i = index"
+         (click)="playTrack(track)">
+      <div class="track-number">{{ track.track_number }}</div>
+      <div class="track-info">
+        <div class="track-name">{{ track.name }}</div>
+        <div class="track-artists">
+          <span *ngFor="let artist of track.artists; let last = last">
+            {{ artist.name }}<span *ngIf="!last">, </span>
+          </span>
+        </div>
+      </div>
+      <div class="track-duration">{{ formatDuration(track.duration_ms) }}</div>
+    </div>
+  </div>
+
+  <div class="album-extra-info" *ngIf="album.release_date || album.copyrights">
+    <div class="extra-info-item" *ngIf="album.release_date">
+      <span class="label">Fecha de lanzamiento:</span>
+      <span class="value">{{ album.release_date }}</span>
+    </div>
+    
+    <div class="extra-info-item" *ngIf="album.label">
+      <span class="label">Discográfica:</span>
+      <span class="value">{{ album.label }}</span>
+    </div>
+
+    <div class="copyrights" *ngIf="album.copyrights && album.copyrights.length > 0">
+      <p *ngFor="let copyright of album.copyrights" class="copyright-text">
+        {{ copyright.text }}
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="loading-container" *ngIf="isLoading">
+  <div class="spinner"></div>
+  <p>Cargando álbum...</p>
+</div>
+
+<div class="error-container" *ngIf="!isLoading && errorMessage">
+  <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+    <path d="M12 8v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+  <p class="error-message">{{ errorMessage }}</p>
+  <button class="retry-button" (click)="goBack()">Volver</button>
+</div>

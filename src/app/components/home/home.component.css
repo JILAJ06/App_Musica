@@ -3,7 +3,7 @@
   grid-template-areas:
     "main queue"
     "player player";
-  grid-template-columns: 1fr 400px;
+  grid-template-columns: 1fr auto;
   grid-template-rows: 1fr 100px;
   height: 100vh;
   background: #0f0318;
@@ -11,7 +11,6 @@
   padding: 8px;
 }
 
-/* ==================== MAIN CONTENT ==================== */
 .main-content {
   grid-area: main;
   background: linear-gradient(180deg, rgba(88, 28, 135, 0.4) 0%, rgba(15, 3, 24, 0.95) 300px);
@@ -195,7 +194,6 @@
   font-size: 0.9rem;
 }
 
-/* Playlist Hero Section */
 .playlist-hero {
   padding: 32px;
   min-height: 340px;
@@ -361,7 +359,6 @@
   box-shadow: 0 8px 24px rgba(147, 51, 234, 0.4);
 }
 
-/* ==================== QUEUE PANEL ==================== */
 .queue-panel {
   grid-area: queue;
   background: rgba(20, 10, 35, 0.95);
@@ -369,6 +366,23 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 400px;
+}
+
+.queue-panel.collapsed {
+  width: 60px;
+}
+
+.queue-panel.collapsed .queue-header h3,
+.queue-panel.collapsed .now-playing,
+.queue-panel.collapsed .queue-content {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.queue-panel.collapsed .close-queue {
+  transform: rotate(180deg);
 }
 
 .queue-header {
@@ -377,12 +391,16 @@
   align-items: center;
   padding: 16px 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  min-height: 64px;
 }
 
 .queue-header h3 {
   font-size: 1rem;
   font-weight: 700;
   color: #ffffff;
+  transition: opacity 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .close-queue {
@@ -391,21 +409,28 @@
   color: #b4b4b4;
   font-size: 1.5rem;
   cursor: pointer;
-  transition: color 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   width: 32px;
   height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .close-queue:hover {
   color: #ffffff;
+  transform: scale(1.1);
 }
 
 .now-playing {
   padding: 16px 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: opacity 0.3s ease;
+}
+
+.queue-content {
+  transition: opacity 0.3s ease;
 }
 
 .now-playing-label {
@@ -570,7 +595,6 @@
   transform: scale(1.1);
 }
 
-/* ==================== PLAYER BAR ==================== */
 .player-bar {
   grid-area: player;
   background: linear-gradient(180deg, rgba(20, 10, 35, 0.98) 0%, rgba(10, 5, 20, 0.98) 100%);
@@ -938,7 +962,6 @@
   color: #3b82f6;
 }
 
-/* ==================== RESPONSIVE ==================== */
 @media (max-width: 1400px) {
   .app-container {
     grid-template-columns: 1fr 350px;
@@ -1070,7 +1093,7 @@
   }
 }
 
-/* ==================== SEARCH RESULTS ==================== */
+
 .error-banner {
   background: rgba(239, 68, 68, 0.15);
   border: 1px solid rgba(239, 68, 68, 0.3);

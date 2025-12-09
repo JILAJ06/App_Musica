@@ -1,6 +1,6 @@
 <div class="app-container">
   <main class="main-content">
-    <!-- Header con logo y barra de búsqueda -->
+
     <header class="top-header">
       <div class="header-logo">
         <div class="logo-icon">🎵</div>
@@ -29,33 +29,30 @@
       </div>
     </header>
 
-    <!-- Mensaje de error -->
     <div class="error-banner" *ngIf="errorMessage">
       <span class="error-icon">⚠️</span>
       <span>{{ errorMessage }}</span>
       <button (click)="errorMessage = ''" class="close-error">✕</button>
     </div>
 
-    <!-- Loading indicator -->
     <div class="loading-container" *ngIf="isLoading">
       <div class="spinner"></div>
       <p>Buscando...</p>
     </div>
 
-    <!-- Resultados de búsqueda -->
-    <div class="search-results-container" *ngIf="hasSearched && !isLoading && (searchTracks.length > 0 || searchAlbums.length > 0)">
-      <!-- Sección de Canciones -->
+    <div class="search-results-container" *ngIf="hasSearched && !isLoading && (searchTracks.length > 0 || searchAlbums.length > 0 || searchArtists.length > 0)">
+
       <section class="search-section" *ngIf="searchTracks.length > 0">
         <h2 class="search-section-title">Canciones</h2>
         <div class="search-grid">
           <div 
             *ngFor="let track of searchTracks" 
             class="search-card"
-            (click)="addToPlaylist(track)">
+            (click)="navigateToTrack(track.id)">
             <div class="search-card-image">
               <img [src]="getAlbumImage(track)" [alt]="track.name">
               <div class="search-card-overlay">
-                <button class="add-btn" title="Agregar a playlist">+</button>
+                <button class="add-btn" (click)="addToPlaylist(track); $event.stopPropagation()" title="Agregar a playlist">+</button>
               </div>
             </div>
             <div class="search-card-info">
@@ -66,13 +63,13 @@
         </div>
       </section>
 
-      <!-- Sección de Álbumes -->
       <section class="search-section" *ngIf="searchAlbums.length > 0">
         <h2 class="search-section-title">Álbumes</h2>
         <div class="search-grid">
           <div 
             *ngFor="let album of searchAlbums" 
-            class="search-card">
+            class="search-card"
+            (click)="navigateToAlbum(album.id)">
             <div class="search-card-image">
               <img [src]="getAlbumImage(album)" [alt]="album.name">
             </div>
@@ -83,16 +80,34 @@
           </div>
         </div>
       </section>
+
+  
+      <section class="search-section" *ngIf="searchArtists.length > 0">
+        <h2 class="search-section-title">Artistas</h2>
+        <div class="search-grid">
+          <div 
+            *ngFor="let artist of searchArtists" 
+            class="search-card"
+            (click)="navigateToArtist(artist.id)">
+            <div class="search-card-image">
+              <img [src]="getAlbumImage(artist)" [alt]="artist.name">
+            </div>
+            <div class="search-card-info">
+              <h3 class="search-card-title">{{ artist.name }}</h3>
+              <p class="search-card-artist">Artista</p>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
 
-    <!-- No results message -->
-    <div class="no-results" *ngIf="hasSearched && !isLoading && searchTracks.length === 0 && searchAlbums.length === 0">
+ 
+    <div class="no-results" *ngIf="hasSearched && !isLoading && searchTracks.length === 0 && searchAlbums.length === 0 && searchArtists.length === 0">
       <div class="no-results-icon">🎵</div>
       <h2>No se encontraron resultados</h2>
       <p>Intenta con otros términos de búsqueda</p>
     </div>
 
-    <!-- Área de la playlist/canción actual -->
     <section class="playlist-hero" *ngIf="currentTrack && !hasSearched; else noTrack">
       <div class="playlist-hero-content">
         <div class="playlist-image">
@@ -127,11 +142,12 @@
     </ng-template>
   </main>
 
-  <!-- Cola de reproducción (derecha) -->
-  <aside class="queue-panel">
+  <aside class="queue-panel" [class.collapsed]="!isQueueVisible">
     <div class="queue-header">
       <h3>🎵 Cola de Reproducción</h3>
-      <button class="close-queue">✕</button>
+      <button class="close-queue" (click)="toggleQueue()" [title]="isQueueVisible ? 'Ocultar cola' : 'Mostrar cola'">
+        {{ isQueueVisible ? '✕' : '☰' }}
+      </button>
     </div>
 
     <div class="now-playing" *ngIf="currentTrack">
@@ -175,7 +191,6 @@
     </div>
   </aside>
 
-  <!-- Reproductor inferior -->
   <footer class="player-bar">
     <div class="player-left" *ngIf="currentTrack">
       <img [src]="getAlbumImage(currentTrack)" [alt]="currentTrack.name" class="player-track-image">

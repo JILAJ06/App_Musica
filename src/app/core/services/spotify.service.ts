@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, BehaviorSubject, from } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
-import { Track, AlbumItem, ArtistItem } from '../models';
+import { Track, AlbumItem, ArtistItem, AlbumDetail, ArtistDetail } from '../models';
 import { environment } from '../../../environments/environment';
 
 /**
@@ -152,6 +152,70 @@ export class SpotifyService {
       switchMap(() => this.http.get<Track>(`${this.apiUrl}/tracks/${id}`, {
         headers: this.getHeaders()
       }))
+    );
+  }
+
+  /**
+   * Obtiene información completa de un álbum por ID
+   * @param id ID del álbum en Spotify
+   * @returns Observable con toda la información del álbum incluyendo pistas
+   */
+  getAlbum(id: string): Observable<AlbumDetail> {
+    return from(this.getAccessToken()).pipe(
+      switchMap(() => this.http.get<AlbumDetail>(`${this.apiUrl}/albums/${id}`, {
+        headers: this.getHeaders()
+      }))
+    );
+  }
+
+  /**
+   * Obtiene información completa de un artista por ID
+   * @param id ID del artista en Spotify
+   * @returns Observable con toda la información del artista
+   */
+  getArtist(id: string): Observable<ArtistDetail> {
+    return from(this.getAccessToken()).pipe(
+      switchMap(() => this.http.get<ArtistDetail>(`${this.apiUrl}/artists/${id}`, {
+        headers: this.getHeaders()
+      }))
+    );
+  }
+
+  /**
+   * Obtiene las canciones más populares de un artista
+   * @param id ID del artista en Spotify
+   * @param market Código de mercado (país) opcional, por defecto 'US'
+   * @returns Observable con las top tracks del artista
+   */
+  getArtistTopTracks(id: string, market: string = 'US'): Observable<Track[]> {
+    const params = new HttpParams().set('market', market);
+    
+    return from(this.getAccessToken()).pipe(
+      switchMap(() => this.http.get<{ tracks: Track[] }>(`${this.apiUrl}/artists/${id}/top-tracks`, {
+        headers: this.getHeaders(),
+        params
+      })),
+      map(response => response.tracks)
+    );
+  }
+
+  /**
+   * Obtiene los álbumes de un artista
+   * @param id ID del artista en Spotify
+   * @param limit Número de álbumes a obtener (por defecto 20)
+   * @returns Observable con los álbumes del artista
+   */
+  getArtistAlbums(id: string, limit: number = 20): Observable<AlbumItem[]> {
+    const params = new HttpParams()
+      .set('limit', limit.toString())
+      .set('include_groups', 'album,single');
+    
+    return from(this.getAccessToken()).pipe(
+      switchMap(() => this.http.get<{ items: AlbumItem[] }>(`${this.apiUrl}/artists/${id}/albums`, {
+        headers: this.getHeaders(),
+        params
+      })),
+      map(response => response.items)
     );
   }
 

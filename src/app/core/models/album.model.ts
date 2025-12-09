@@ -1,9 +1,7 @@
 import { Image } from './image.model';
 import { Artist } from './artist.model';
 
-/**
- * Interfaz que representa un álbum de Spotify
- */
+
 export interface Album {
   /** ID único del álbum */
   id: string;
@@ -24,11 +22,37 @@ export interface Album {
   total_tracks?: number;
 }
 
-/**
- * Interfaz extendida de álbum con artistas
- * Usado en resultados de búsqueda
- */
+
 export interface AlbumItem extends Omit<Album, 'album_type'> {
-  /** Artistas del álbum */
+
   artists?: Artist[];
+}
+
+export interface AlbumDetail extends Album {
+
+  artists: Artist[];
+  
+  tracks: {
+    items: AlbumTrack[];
+  };
+  
+  copyrights?: Array<{
+    text: string;
+    type: string;
+  }>;
+  
+  genres?: string[];
+  
+  label?: string;
+  
+  popularity?: number;
+}
+
+export interface AlbumTrack {
+  id: string;
+  name: string;
+  artists: Artist[];
+  duration_ms: number;
+  track_number: number;
+  preview_url: string | null;
 }

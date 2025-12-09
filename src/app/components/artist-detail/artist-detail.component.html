@@ -1,0 +1,89 @@
+<div class="artist-detail-container" *ngIf="!loading && !error && artist">
+  <!-- Header -->
+  <div class="artist-header">
+    <button class="back-button" (click)="goBack()">
+      <span>←</span>
+    </button>
+
+    <div class="artist-hero">
+      <div class="artist-cover">
+        <img [src]="getArtistImage()" [alt]="artist.name">
+      </div>
+      <div class="artist-info">
+        <span class="artist-label">ARTISTA</span>
+        <h1 class="artist-name">{{ artist.name }}</h1>
+        <div class="artist-stats">
+          <span class="stat">{{ formatFollowers(artist.followers?.total || 0) }} seguidores</span>
+          <span class="separator">•</span>
+          <span class="stat">{{ artist.popularity }}% popularidad</span>
+        </div>
+        <div class="artist-genres" *ngIf="artist.genres && artist.genres.length > 0">
+          <span class="genre" *ngFor="let genre of artist.genres">{{ genre }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Tracks -->
+  <div class="top-tracks-section" *ngIf="topTracks && topTracks.length > 0">
+    <h2 class="section-title">Canciones Populares</h2>
+    <div class="tracks-list">
+      <div 
+        class="track-item" 
+        *ngFor="let track of topTracks; let i = index"
+        (click)="goToTrack(track.id)">
+        <span class="track-number">{{ i + 1 }}</span>
+        <div class="track-cover-small">
+          <img [src]="getTrackImage(track)" [alt]="track.name">
+        </div>
+        <div class="track-details">
+          <div class="track-name">{{ track.name }}</div>
+          <div class="track-album">{{ track.album.name }}</div>
+        </div>
+        <button 
+          class="play-button-small" 
+          (click)="playTrack(track); $event.stopPropagation()"
+          title="Reproducir">
+          ▶
+        </button>
+        <span class="track-duration">{{ formatDuration(track.duration_ms) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Álbumes -->
+  <div class="albums-section" *ngIf="albums && albums.length > 0">
+    <h2 class="section-title">Álbumes</h2>
+    <div class="albums-grid">
+      <div 
+        class="album-card" 
+        *ngFor="let album of albums"
+        (click)="goToAlbum(album.id)">
+        <div class="album-cover">
+          <img [src]="getAlbumImage(album)" [alt]="album.name">
+          <div class="album-play-overlay">
+            <span>▶</span>
+          </div>
+        </div>
+        <div class="album-info">
+          <div class="album-name">{{ album.name }}</div>
+          <div class="album-meta">
+            {{ getAlbumYear(album.release_date || '') }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading State -->
+<div class="loading-container" *ngIf="loading">
+  <div class="spinner"></div>
+  <p>Cargando información del artista...</p>
+</div>
+
+<!-- Error State -->
+<div class="error-container" *ngIf="error">
+  <p class="error-message">{{ error }}</p>
+  <button class="retry-button" (click)="retry()">Reintentar</button>
+</div>
